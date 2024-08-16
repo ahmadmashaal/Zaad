@@ -1,33 +1,32 @@
-// config/db.js
-const sql = require('mssql');
-require('dotenv').config();  // Load environment variables from .env file
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
 
-// Define the configuration for your SQL Server connection using environment variables
-const config = {
-    user: process.env.DB_USER,  
-    password: process.env.DB_PASSWORD,  
-    server: process.env.DB_SERVER,  
-    database: process.env.DB_NAME,  
-    port: parseInt(process.env.DB_PORT, 10),  
-    options: {
-        encrypt: process.env.DB_ENCRYPT === 'true',  
-        trustServerCertificate: true  
-    }
-};
+// Load environment variables
+dotenv.config();
 
-// Function to connect to the database
-async function connectToDatabase() {
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_SERVER,
+    dialect: 'mssql',
+    port: parseInt(process.env.DB_PORT, 10),
+    dialectOptions: {
+        options: {
+            encrypt: process.env.DB_ENCRYPT === 'true',
+            trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+        },
+    },
+    define: {
+        timestamps: false,
+    },
+});
+
+export async function connectToDatabase() {
     try {
-        const pool = await sql.connect(config);
-        console.log('Connected to the database successfully!');
-        return pool;
-    } catch (err) {
-        console.error('Database connection failed:', err);
-        throw err;
+        await sequelize.authenticate();
+        console.log('Connected to the database successfully using Sequelize!');
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+        throw error;
     }
 }
 
-module.exports = {
-    connectToDatabase,
-    sql
-};
+export { sequelize as sql };
