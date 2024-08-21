@@ -1,8 +1,8 @@
 import { DataTypes } from 'sequelize';
 import bcrypt from 'bcrypt';
 import { sql } from '../config/db.js';
+import { hashPassword } from '../utils/auth.js';
 
-const SALT_ROUNDS = 10;
 
 const User = sql.define('User', {
     user_id: {
@@ -70,21 +70,19 @@ const User = sql.define('User', {
     },
 }, {
     tableName: 'users', // This explicitly defines the table name
-    timestamps: false, // Since you are managing timestamps manually
+    timestamps: false, // Since we are managing timestamps manually
     hooks: {
         beforeCreate: async (user) => {
             // Convert email to lowercase before saving
             user.email = user.email.toLowerCase();
 
             // Hash the password before saving
-            const salt = await bcrypt.genSalt(SALT_ROUNDS);
-            user.password_hash = await bcrypt.hash(user.password_hash, salt);
+            user.password_hash = await hashPassword(user.password_hash);
         },
         beforeUpdate: async (user) => {
             // Hash the password only if it has been changed
             if (user.changed('password_hash')) {
-                const salt = await bcrypt.genSalt(SALT_ROUNDS);
-                user.password_hash = await bcrypt.hash(user.password_hash, salt);
+                user.password_hash = await hashPassword(user.password_hash);
             }
         }
     },
