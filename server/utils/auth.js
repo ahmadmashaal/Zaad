@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
  */
 
 export async function hashPassword(password) {
-    const SALT_ROUNDS = 10;
+  const SALT_ROUNDS = 10;
   try {
     const salt = await bcrypt.genSalt(SALT_ROUNDS);
     return await bcrypt.hash(password, salt);
@@ -15,7 +15,6 @@ export async function hashPassword(password) {
     throw new Error("Error hashing password");
   }
 }
-
 
 /**
  * Compares a plain text password with a hashed password.

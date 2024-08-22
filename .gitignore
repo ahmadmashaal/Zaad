@@ -7,6 +7,7 @@ client/.next/
 
 #Ignore .env file
 server/.env
+client/.env.local
 
 # Ignore package-lock.json
 server/package-lock.json

@@ -17,6 +17,7 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
     define: {
         timestamps: false,
     },
+    logging: console.log, // This will log the SQL queries generated
 });
 
 export async function connectToDatabase() {
