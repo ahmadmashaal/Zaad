@@ -4,7 +4,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {}
   },
   "keywords": [],
   "author": "",
@@ -21,5 +26,8 @@
     "nodemon": "^3.1.4",
     "sequelize": "^6.37.3",
     "tedious": "^18.3.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

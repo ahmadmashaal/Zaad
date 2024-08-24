@@ -73,12 +73,14 @@ const User = sql.define(
         // Convert email to lowercase before saving
         user.email = user.email.toLowerCase();
 
-        // Hash the password before saving
-        user.password_hash = await hashPassword(user.password_hash);
+        // Hash the password before saving, only if it is not already hashed
+        if (!user.password_hash.startsWith("$2b$")) {
+          user.password_hash = await hashPassword(user.password_hash);
+        }
       },
       beforeUpdate: async (user) => {
-        // Hash the password only if it has been changed
-        if (user.changed("password_hash")) {
+        // Hash the password only if it has been changed and is not already hashed
+        if (user.changed("password_hash") && !user.password_hash.startsWith("$2b$")) {
           user.password_hash = await hashPassword(user.password_hash);
         }
       },

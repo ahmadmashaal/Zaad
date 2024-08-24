@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import { hashPassword, comparePassword } from "../utils/auth.js";
 import { validateRegisterInput } from "../utils/validation.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 export const register = async (req, res) => {
   try {
@@ -23,8 +24,12 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: "Email is already taken" });
     }
 
+    console.log('Registration - Plain Password:', password);
+
     // Hash the password
     const hashedPassword = await hashPassword(password);
+
+    console.log('Registration - Hashed Password:', hashedPassword);
 
     // Save the user with the role set to 'student'
     const newUser = await User.create({
@@ -36,6 +41,8 @@ export const register = async (req, res) => {
       created_at: new Date(),
       updated_at: new Date(),
     });
+
+    console.log('Registration - Stored Password Hash:', newUser.password_hash);
 
     // Send a success response
     return res.status(201).json({
@@ -56,33 +63,29 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    // TEST
-    const plainPassword = "P@ssw0rd123";
+    const { email, password } = req.body; // Fetch the user from the database
 
-    const hash1 = await hashPassword(plainPassword);
-    console.log("Hash 1:", hash1);
+    console.log('Login - Received Email:', email);
+    console.log('Login - Received Password:', password);
 
-    const hash2 = await hashPassword(plainPassword);
-    console.log("Hash 2:", hash2);
-
-    console.log("Hashes match:", hash1 === hash2); // This should be false due to different salts.
-
-    // END TEST
-
-    const { email, password } = req.body;
-
-    // Fetch the user from the database
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(400).json({ error: "No user found with this email" });
     }
 
-    // Check if the password is correct
-    console.log("User Password Hash:", user.password_hash);
-    console.log("Plain Password:", password);
+    console.log('Login - Stored Password Hash:', user.password_hash);
 
+    console.log("Retrieved Password Hash:", user.password_hash);
+    console.log("Hash Length:", user.password_hash.length);
+
+    console.log("Plain Password:", password);
+    console.log("Stored Hashed Password:", user.password_hash);
+
+    // Compare password
     const match = await comparePassword(password, user.password_hash);
-    console.log("Password Match:", match);
+
+    console.log('Login - Password Match Result:', match);
+
     if (!match) {
       return res.status(400).json({ error: "Incorrect password" });
     }

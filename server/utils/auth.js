@@ -25,8 +25,13 @@ export async function hashPassword(password) {
 
 export async function comparePassword(plainPassword, hashedPassword) {
   try {
-    return await bcrypt.compare(plainPassword, hashedPassword);
+
+    // Trim the plain password 
+    const trimmedPassword = plainPassword.trim();
+
+    return await bcrypt.compare(trimmedPassword, hashedPassword);
   } catch (error) {
+    console.error("Error comparing passwords:", error);
     throw new Error("Error comparing passwords");
   }
 }
