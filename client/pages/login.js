@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { SyncOutlined } from "@ant-design/icons";
@@ -16,8 +16,18 @@ const Login = () => {
   // Accessing global authentication state and dispatch function from AuthContext
   const { state, dispatch } = useContext(AuthContext);
 
+  // Destructure user from state
+  const { user } = state;
+
   // Next.js router for navigation
   const router = useRouter();
+
+  // Redirect Logged in user to home page if they try to access login page
+  useEffect(() => {
+    if (user !== null) {
+      router.push("/");
+    }
+  }, [user]);
 
   // Handle form submission
   const handleSubmit = async (e) => {

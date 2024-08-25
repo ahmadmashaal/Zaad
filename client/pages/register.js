@@ -1,14 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { SyncOutlined } from "@ant-design/icons";
 import Link from "next/link";
+import { AuthContext } from "../context";
+import { useRouter } from "next/router";
 
 const Register = () => {
   const [name, setName] = useState("Ahmad Mashal");
   const [email, setEmail] = useState("ahmad@zaad.com");
   const [password, setPassword] = useState("P@ssw0rd123");
   const [loading, setLoading] = useState(false);
+
+  const { state } = useContext(AuthContext);
+
+    // Destructure user from state
+    const { user } = state;
+
+  const router = useRouter();
+
+    // Redirect Logged in user to home page if they try to access register page
+    useEffect(() => {
+      if (user !== null) {
+        router.push("/");
+      }
+    }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -24,7 +24,6 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: "Email is already taken" });
     }
 
-
     // Hash the password
     const hashedPassword = await hashPassword(password);
 
@@ -38,7 +37,6 @@ export const register = async (req, res) => {
       created_at: new Date(),
       updated_at: new Date(),
     });
-
 
     // Send a success response
     return res.status(201).json({
@@ -102,5 +100,14 @@ export const login = async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    return res.json({ message: "Signout success" });
+  } catch (err) {
+    console.log(err);
   }
 };
