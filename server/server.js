@@ -19,30 +19,32 @@ app.use(morgan("dev"));
 
 // Function to load routes dynamically
 async function loadRoutes() {
-    const routeFiles = readdirSync("./routes");
-    for (const file of routeFiles) {
-        const route = await import(`./routes/${file}`);
-        app.use("/api", route.default);
-    }
+  const routeFiles = readdirSync("./routes");
+  for (const file of routeFiles) {
+    const route = await import(`./routes/${file}`);
+    app.use("/api", route.default);
+  }
 }
 
 // Connect to the database before setting up routes
-connectToDatabase().then(async () => {
+connectToDatabase()
+  .then(async () => {
     // Load routes only after successful database connection
     await loadRoutes();
 
     // Listen on the port only after successful route loading
     const port = process.env.PORT || 8000;
     app.listen(port, () => console.log(`Server is running on port ${port}`));
-}).catch(err => {
-    console.error('Failed to start the server: ', err);
+  })
+  .catch((err) => {
+    console.error("Failed to start the server: ", err);
     process.exit(1); // Exit the application if the database connection fails
-});
+  });
 
 // Clean up the SQL connection pool when the server is stopped
-process.on('SIGINT', () => {
-    sql.close(() => {
-        console.log('SQL connection pool closed.');
-        process.exit(0);
-    });
+process.on("SIGINT", () => {
+  sql.close(() => {
+    console.log("SQL connection pool closed.");
+    process.exit(0);
+  });
 });

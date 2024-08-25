@@ -24,12 +24,9 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: "Email is already taken" });
     }
 
-    console.log('Registration - Plain Password:', password);
 
     // Hash the password
     const hashedPassword = await hashPassword(password);
-
-    console.log('Registration - Hashed Password:', hashedPassword);
 
     // Save the user with the role set to 'student'
     const newUser = await User.create({
@@ -42,7 +39,6 @@ export const register = async (req, res) => {
       updated_at: new Date(),
     });
 
-    console.log('Registration - Stored Password Hash:', newUser.password_hash);
 
     // Send a success response
     return res.status(201).json({
@@ -65,26 +61,13 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body; // Fetch the user from the database
 
-    console.log('Login - Received Email:', email);
-    console.log('Login - Received Password:', password);
-
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(400).json({ error: "No user found with this email" });
     }
 
-    console.log('Login - Stored Password Hash:', user.password_hash);
-
-    console.log("Retrieved Password Hash:", user.password_hash);
-    console.log("Hash Length:", user.password_hash.length);
-
-    console.log("Plain Password:", password);
-    console.log("Stored Hashed Password:", user.password_hash);
-
     // Compare password
     const match = await comparePassword(password, user.password_hash);
-
-    console.log('Login - Password Match Result:', match);
 
     if (!match) {
       return res.status(400).json({ error: "Incorrect password" });
@@ -100,7 +83,7 @@ export const login = async (req, res) => {
     // Send the token in a secure, HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
+      //secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
       sameSite: "strict", // Protect against CSRF
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
