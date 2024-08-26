@@ -3,7 +3,7 @@ import { Menu } from "antd";
 import Link from "next/link";
 import {
   AppstoreOutlined,
-  CoffeeOutlined,
+  UserOutlined,
   LoginOutlined,
   LogoutOutlined,
   UserAddOutlined,
@@ -67,7 +67,7 @@ const TopNav = () => {
     menuItems.push(
       {
         key: "user",
-        icon: <CoffeeOutlined />,
+        icon: <UserOutlined />,
         label: user.user.name || user.user.email, // Display user's name or email
         children: [
           {
