@@ -143,12 +143,7 @@ export const currentUser = async (req, res) => {
     }
 
     // Send the user details, excluding the password
-    return res.json({
-      id: user.user_id,
-      name: `${user.first_name} ${user.last_name}`,
-      email: user.email,
-      role: user.role,
-    });
+    return res.json({ ok: true });
   } catch (err) {
     console.error("Current user retrieval error:", err);
     return res.status(500).json({ error: "Internal server error" });

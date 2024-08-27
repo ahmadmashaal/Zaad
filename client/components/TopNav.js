@@ -7,6 +7,7 @@ import {
   LoginOutlined,
   LogoutOutlined,
   UserAddOutlined,
+  CoffeeOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../context";
 import axios from "axios";
@@ -75,6 +76,11 @@ const TopNav = () => {
             icon: <LogoutOutlined />,
             label: "Logout",
             onClick: logout,
+          },
+          {
+            key: "/user",
+            icon: <CoffeeOutlined/>,
+            label: <Link href="/user">User</Link>,
           },
         ],
         style: { marginLeft: "auto" }, // Pushes the submenu to the right
