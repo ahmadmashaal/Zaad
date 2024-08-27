@@ -17,8 +17,13 @@ const csrfProtection = new csrf();
 // Create express app
 const app = express();
 
+const corsOptions = {
+  origin: 'http://localhost:3000',  // Our frontend URL
+  credentials: true,  // Allow credentials (cookies, authorization headers, etc.)
+};
+
 // Apply middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json()); // to communicate with frontend with JSON
 app.use(morgan("dev")); // Log HTTP requests
 app.use(cookieParser()); // to parse cookies attached to the client request

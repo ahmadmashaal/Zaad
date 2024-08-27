@@ -34,10 +34,16 @@ const Login = () => {
     e.preventDefault(); // Prevent the default form submission behavior
     try {
       setLoading(true); // Set loading state to true while request is in progress
-      const { data } = await axios.post(`http://localhost:8000/api/login`, {
-        email,
-        password,
-      });
+      const { data } = await axios.post(
+        `http://localhost:8000/api/login`,
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
       // Dispatch the "LOGIN" action to update the global authentication state
       dispatch({

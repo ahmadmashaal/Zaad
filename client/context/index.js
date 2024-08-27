@@ -95,6 +95,7 @@ const AuthProvider = ({ children }) => {
         // Fetch the CSRF token from the server.
         const { data } = await axios.get("http://localhost:8000/api/csrf-token");
         console.log("CSRF", data);
+        axios.defaults.withCredentials = true;
 
         // Correct the setting of the Axios default headers.
         axios.defaults.headers["X-CSRF-Token"] = data.csrfToken;

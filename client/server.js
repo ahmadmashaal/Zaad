@@ -14,7 +14,6 @@ app
 
     // Log when the server receives a request
     server.use((req, res, next) => {
-      console.log(`Frontend Server received: ${req.method} ${req.url}`);
       next();
     });
 
@@ -32,7 +31,6 @@ app
 
     // Handle all other requests with Next.js
     server.all("*", (req, res) => {
-      console.log(`Handling with Next.js: ${req.method} ${req.url}`);
       return handle(req, res);
     });
 

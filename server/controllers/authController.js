@@ -51,6 +51,7 @@ export const register = async (req, res) => {
         name: `${newUser.first_name} ${newUser.last_name}`,
         email: newUser.email,
         role: newUser.role,
+        profile_picture_url: newUser.profile_picture_url, // Include profile picture URL if available
       },
     });
   } catch (err) {
@@ -81,7 +82,11 @@ export const login = async (req, res) => {
 
     // Create a signed JWT token
     const token = jwt.sign(
-      { user_id: user.user_id, role: user.role },
+      {
+        user_id: user.user_id,
+        role: user.role,
+        profile_picture_url: user.profile_picture_url, // Include profile picture URL in the token
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -89,19 +94,19 @@ export const login = async (req, res) => {
     // Send the token in a secure, HTTP-only cookie
     res.cookie("token", token, {
       httpOnly: true,
-      sameSite: "strict", // Protect against CSRF
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     // Send the token and user details in the response, excluding the password
     return res.status(200).json({
-      message: "Login successful",
-      token,
       user: {
         id: user.user_id,
         name: `${user.first_name} ${user.last_name}`,
         email: user.email,
         role: user.role,
+        profile_picture_url: user.profile_picture_url, // Return profile picture URL in response
       },
     });
   } catch (err) {
@@ -131,8 +136,8 @@ export const logout = async (req, res) => {
 export const currentUser = async (req, res) => {
   try {
     // Fetch the user from the database using the user ID from the JWT token
-    const user = await User.findOne({ where: { user_id: req.user.user_id } });
-    
+    const user = await User.findOne({ where: { user_id: req.auth.user_id } });
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
