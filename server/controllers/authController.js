@@ -3,6 +3,16 @@ import { hashPassword, comparePassword } from "../utils/auth.js";
 import { validateRegisterInput } from "../utils/validation.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+
+// Initialize the SES client with AWS SDK v3
+const SES = new SESClient({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
 /**
  * Controller to handle user registration.
@@ -147,5 +157,50 @@ export const currentUser = async (req, res) => {
   } catch (err) {
     console.error("Current user retrieval error:", err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const sendTestEmail = async (req, res) => {
+  try {
+    const params = {
+      Source: process.env.EMAIL_FROM,
+      Destination: {
+        ToAddresses: ["a7madmash3al@gmail.com"],
+      },
+      ReplyToAddresses: [process.env.EMAIL_FROM],
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
+            <html>
+              <h1>This is a test email from your application.</h1>
+              <p>Please use the following link to reset your password</p>
+            </html>
+            `,
+          },
+          Text: {
+            Data: "This is a test email from your application.",
+          },
+        },
+        Subject: {
+          Data: "Password reset link",
+        },
+      },
+    };
+
+    console.log("AWS Access Key ID:", process.env.AWS_ACCESS_KEY_ID);
+    console.log("AWS Secret Access Key:", process.env.AWS_SECRET_ACCESS_KEY);
+    console.log("AWS Region:", process.env.AWS_REGION);
+
+    // Send the email using AWS SDK v3
+    const command = new SendEmailCommand(params);
+    const email = await SES.send(command);
+
+    console.log(email);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Error sending email:", err);
+    res.status(500).json({ error: "Failed to send email" });
   }
 };
