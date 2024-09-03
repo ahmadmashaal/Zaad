@@ -40,6 +40,8 @@ CREATE TABLE users (
     profile_picture_url VARCHAR(255),
     created_at DATETIME2 DEFAULT GETDATE(),
     updated_at DATETIME2 DEFAULT GETDATE(),
+    password_reset_code VARCHAR(100),
+    password_reset_expires DATETIME2,
     CONSTRAINT chk_email_format CHECK (email LIKE '%_@__%.__%')
 );
 

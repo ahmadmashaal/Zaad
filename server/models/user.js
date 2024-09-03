@@ -6,8 +6,8 @@ const User = sql.define(
   "User",
   {
     user_id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     first_name: {
@@ -25,6 +25,11 @@ const User = sql.define(
       validate: {
         isEmail: true,
         isLowercase: true,
+        matchesEmailFormat(value) {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+            throw new Error('Invalid email format');
+          }
+        },
       },
     },
     password_hash: {
@@ -60,6 +65,14 @@ const User = sql.define(
     },
     profile_picture_url: {
       type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    password_reset_code: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    password_reset_expires: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   },

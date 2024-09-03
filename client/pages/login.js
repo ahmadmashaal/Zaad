@@ -111,6 +111,10 @@ const Login = () => {
         <p className="text-center p-3">
           Not yet registered? <Link href="/register">Register</Link>
         </p>
+
+        <p className="text-center pt-1">
+          <Link href="/forgot-password">Forgot Password</Link>
+        </p>
       </div>
     </>
   );

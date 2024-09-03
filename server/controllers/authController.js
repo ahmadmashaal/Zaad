@@ -4,6 +4,7 @@ import { validateRegisterInput } from "../utils/validation.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import crypto from "crypto";
 
 // Initialize the SES client with AWS SDK v3
 const SES = new SESClient({
@@ -160,47 +161,89 @@ export const currentUser = async (req, res) => {
   }
 };
 
-export const sendTestEmail = async (req, res) => {
+export const forgotPassword = async (req, res) => {
   try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Generate a secure 6-digit code
+    const resetCode = Array.from({length: 6}, () => {
+      const choice = Math.random();
+      if (choice < 0.4) return Math.floor(Math.random() * 10).toString();
+      else if (choice < 0.7) return String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      else return String.fromCharCode(97 + Math.floor(Math.random() * 26));
+    }).join('');
+    const resetCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+
+    // Update user with reset code and expiry
+    try {
+      await User.update(
+        { 
+          password_reset_code: resetCode, 
+          password_reset_expires: resetCodeExpiry 
+        },
+        { 
+          where: { user_id: user.user_id },
+          individualHooks: false,
+          validate: false,
+        }
+      );
+    } catch (updateError) {
+      console.error("Error updating user:", updateError);
+      return res.status(500).json({ error: "Error updating user" });
+    }
+
+    // Prepare email parameters
     const params = {
       Source: process.env.EMAIL_FROM,
       Destination: {
-        ToAddresses: ["a7madmash3al@gmail.com"],
+        ToAddresses: [email],
       },
       ReplyToAddresses: [process.env.EMAIL_FROM],
       Message: {
+        Subject: { 
+          Charset: "UTF-8",
+          Data: "Password Reset Request" 
+        },
         Body: {
           Html: {
             Charset: "UTF-8",
-            Data: `
-            <html>
-              <h1>This is a test email from your application.</h1>
-              <p>Please use the following link to reset your password</p>
-            </html>
-            `,
+            Data: `<html>
+            <head></head>
+            <body>
+            <p>Please use the following code to reset your password:</p>
+            <p style="font-size: 24px; font-weight: bold;">${resetCode}</p>
+            <p>If you did not request a password reset, please ignore this email.</p>
+            <p>Thank you,</p>
+            <p>The Zaad Team</p>
+            <i>zaad.com</i>
+            </body>
+            </html>`
           },
           Text: {
-            Data: "This is a test email from your application.",
-          },
-        },
-        Subject: {
-          Data: "Password reset link",
-        },
-      },
+            Charset: "UTF-8",
+            Data: `Your password reset code is: ${resetCode}. If you did not request a password reset, please ignore this email.`
+          }
+        }
+      }
     };
 
-    console.log("AWS Access Key ID:", process.env.AWS_ACCESS_KEY_ID);
-    console.log("AWS Secret Access Key:", process.env.AWS_SECRET_ACCESS_KEY);
-    console.log("AWS Region:", process.env.AWS_REGION);
-
-    // Send the email using AWS SDK v3
-    const command = new SendEmailCommand(params);
-    const email = await SES.send(command);
-
-    console.log(email);
-    res.json({ ok: true });
+    // Send the email
+    try {
+      const command = new SendEmailCommand(params);
+      await SES.send(command);
+      console.log(`Reset code for ${email}: ${resetCode}`);
+      return res.json({ message: "Password reset code sent to your email" });
+    } catch (emailError) {
+      console.error("Error sending email:", emailError);
+      return res.status(500).json({ error: "Failed to send email", details: emailError.message });
+    }
   } catch (err) {
-    console.error("Error sending email:", err);
-    res.status(500).json({ error: "Failed to send email" });
+    console.error("Forgot password error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
